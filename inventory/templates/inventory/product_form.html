@@ -1,0 +1,144 @@
+{% extends "inventory/base.html" %}
+
+{% block title %}{{ title }} | Inventory System{% endblock %}
+{% block page_heading %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm bg-white p-4">
+            <div class="d-flex align-items-center justify-content-between pb-3 mb-4 border-bottom">
+                <div>
+                    <h5 class="fw-bold mb-1">{{ title }}</h5>
+                    <small class="text-muted">Enter product specifications and inventory stock levels</small>
+                </div>
+                <a href="{% url 'inventory:product_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Products
+                </a>
+            </div>
+
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger shadow-sm mb-4">
+                    {% for error in form.non_field_errors %}
+                        <div><i class="bi bi-exclamation-circle me-1"></i> {{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row g-3">
+                    <!-- Product Name -->
+                    <div class="col-12 col-md-8">
+                        <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">
+                            Product Name <span class="text-danger">*</span>
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.name.errors %}
+                                    <div><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- SKU -->
+                    <div class="col-12 col-md-4">
+                        <label for="{{ form.sku.id_for_label }}" class="form-label fw-semibold">
+                            SKU (Stock Keeping Unit) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.sku }}
+                        {% if form.sku.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.sku.errors %}
+                                    <div><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="form-text small">Unique item identifier</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Category -->
+                    <div class="col-12 col-md-4">
+                        <label for="{{ form.category.id_for_label }}" class="form-label fw-semibold">
+                            Category <span class="text-danger">*</span>
+                        </label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.category.errors %}
+                                    <div><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Price -->
+                    <div class="col-12 col-md-4">
+                        <label for="{{ form.price.id_for_label }}" class="form-label fw-semibold">
+                            Unit Price (₹) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            {{ form.price }}
+                        </div>
+                        {% if form.price.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.price.errors %}
+                                    <div><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="form-text small">Minimum ₹0.01</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Stock Quantity -->
+                    <div class="col-12 col-md-4">
+                        <label for="{{ form.stock_quantity.id_for_label }}" class="form-label fw-semibold">
+                            Initial Stock Quantity <span class="text-danger">*</span>
+                        </label>
+                        {{ form.stock_quantity }}
+                        {% if form.stock_quantity.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.stock_quantity.errors %}
+                                    <div><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="form-text small">&le; 5 flags as low stock</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+                            Description
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.description.errors %}
+                                    <div><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex align-items-center justify-content-end gap-2">
+                    <a href="{% url 'inventory:product_list' %}" class="btn btn-light px-4 border">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                        <i class="bi bi-check-lg me-1"></i> {% if is_create %}Create Product{% else %}Save Changes{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

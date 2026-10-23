@@ -1,0 +1,280 @@
+{% extends "inventory/base.html" %}
+
+{% block title %}Dashboard | Inventory Management System{% endblock %}
+{% block page_heading %}Overview Dashboard{% endblock %}
+
+{% block content %}
+<!-- Metric Stat Cards -->
+<div class="row g-3 mb-4">
+    <!-- Total Products -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card p-3 border-0 shadow-sm bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em;">Total Products</span>
+                    <h3 class="fw-bold mt-1 mb-0 text-dark">{{ total_products }}</h3>
+                    <small class="text-muted">In inventory database</small>
+                </div>
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Stock Value -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card p-3 border-0 shadow-sm bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em;">Total Stock Value</span>
+                    <h3 class="fw-bold mt-1 mb-0 text-success">₹{{ total_stock_value|floatformat:2 }}</h3>
+                    <small class="text-muted">Cumulative asset valuation</small>
+                </div>
+                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-currency-rupee"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock Items -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card p-3 border-0 shadow-sm bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em;">Low Stock Alert</span>
+                    <h3 class="fw-bold mt-1 mb-0 text-danger">{{ low_stock_count }}</h3>
+                    <small class="text-danger fw-semibold">Quantity &le; 5 units</small>
+                </div>
+                <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Categories -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card p-3 border-0 shadow-sm bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em;">Total Categories</span>
+                    <h3 class="fw-bold mt-1 mb-0 text-purple" style="color: #7c3aed;">{{ total_categories }}</h3>
+                    <small class="text-muted">Product classifications</small>
+                </div>
+                <div class="stat-icon bg-opacity-10" style="background-color: rgba(124, 58, 237, 0.1); color: #7c3aed;">
+                    <i class="bi bi-tags"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-4 mb-4">
+    <!-- Bar Chart: Stock Value per Category -->
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm p-4 h-100 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                    <h6 class="fw-bold mb-0">Inventory Valuation by Category</h6>
+                    <small class="text-muted">Total financial stock value per category</small>
+                </div>
+                <span class="badge bg-light text-secondary border">Value (₹)</span>
+            </div>
+            <div style="position: relative; height: 300px;">
+                <canvas id="categoryValueChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doughnut / Pie Chart: Product Distribution -->
+    <div class="col-12 col-lg-5">
+        <div class="card border-0 shadow-sm p-4 h-100 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                    <h6 class="fw-bold mb-0">Product Distribution</h6>
+                    <small class="text-muted">Number of items per category</small>
+                </div>
+                <span class="badge bg-light text-secondary border">Item Count</span>
+            </div>
+            <div style="position: relative; height: 300px;" class="d-flex align-items-center justify-content-center">
+                <canvas id="categoryDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Low Stock Table Section -->
+<div class="card border-0 shadow-sm bg-white">
+    <div class="card-header bg-transparent border-bottom p-3 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-shield-exclamation text-danger fs-5"></i>
+            <div>
+                <h6 class="fw-bold mb-0 text-danger">Low Stock Items Requiring Attention</h6>
+                <small class="text-muted">Showing products with stock quantity of 5 or fewer units</small>
+            </div>
+        </div>
+        <a href="{% url 'inventory:product_list' %}?ordering=stock_quantity" class="btn btn-outline-danger btn-sm">
+            View All in Catalog <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" style="width: 140px;">SKU</th>
+                    <th scope="col">Product Name</th>
+                    <th scope="col">Category</th>
+                    <th scope="col" class="text-end">Price</th>
+                    <th scope="col" class="text-center" style="width: 130px;">Stock Left</th>
+                    <th scope="col" class="text-center" style="width: 130px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in low_stock_products %}
+                <tr class="low-stock-row">
+                    <td>
+                        <span class="badge bg-dark bg-opacity-75 font-monospace">{{ item.sku }}</span>
+                    </td>
+                    <td>
+                        <span class="fw-semibold text-dark">{{ item.name }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary bg-opacity-10 text-dark">{{ item.category.name }}</span>
+                    </td>
+                    <td class="text-end fw-semibold">
+                        ₹{{ item.price|floatformat:2 }}
+                    </td>
+                    <td class="text-center">
+                        {% if item.stock_quantity == 0 %}
+                            <span class="badge badge-stock-danger px-2 py-1 rounded-pill">
+                                <i class="bi bi-x-circle me-1"></i> Out of Stock
+                            </span>
+                        {% else %}
+                            <span class="badge badge-stock-danger px-2 py-1 rounded-pill">
+                                <i class="bi bi-exclamation-circle me-1"></i> {{ item.stock_quantity }} units
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <a href="{% url 'inventory:product_edit' item.pk %}" class="btn btn-sm btn-danger px-3 shadow-sm">
+                            <i class="bi bi-pencil-square me-1"></i> Restock
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                        <i class="bi bi-check-circle text-success fs-3 d-block mb-1"></i>
+                        <span>Awesome! No products currently have critically low stock.</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const categories = {{ chart_categories_json|safe }};
+        const stockValues = {{ chart_stock_values_json|safe }};
+        const productCounts = {{ chart_product_counts_json|safe }};
+
+        const palette = [
+            '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6',
+            '#ef4444', '#06b6d4', '#ec4899', '#6366f1'
+        ];
+
+        // 1. Bar Chart: Stock Value
+        const ctxBar = document.getElementById('categoryValueChart').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: 'Stock Value (₹)',
+                    data: stockValues,
+                    backgroundColor: palette.slice(0, categories.length),
+                    borderRadius: 6,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ' Value: ₹' + Number(context.raw).toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                });
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value.toLocaleString();
+                            }
+                        },
+                        grid: { color: '#f1f5f9' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // 2. Doughnut Chart: Product Distribution
+        const ctxPie = document.getElementById('categoryDistributionChart').getContext('2d');
+        new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: categories,
+                datasets: [{
+                    data: productCounts,
+                    backgroundColor: palette.slice(0, categories.length),
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 12,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ' ' + context.label + ': ' + context.raw + ' items';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

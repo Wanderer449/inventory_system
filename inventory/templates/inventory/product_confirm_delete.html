@@ -1,0 +1,48 @@
+{% extends "inventory/base.html" %}
+
+{% block title %}Confirm Delete Product | Inventory System{% endblock %}
+{% block page_heading %}Delete Product Confirmation{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6">
+        <div class="card border-0 shadow-sm p-4 bg-white text-center">
+            <div class="stat-icon bg-danger bg-opacity-10 text-danger mx-auto mb-3" style="width: 64px; height: 64px; font-size: 1.8rem; border-radius: 50%;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+
+            <h5 class="fw-bold text-danger mb-2">Delete This Product?</h5>
+            <p class="text-muted mb-4">
+                Are you sure you want to permanently remove <strong>"{{ product.name }}"</strong> (SKU: <code>{{ product.sku }}</code>)? This action cannot be undone.
+            </p>
+
+            <div class="bg-light p-3 rounded text-start mb-4 border">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted small">Category:</span>
+                    <span class="fw-semibold small">{{ product.category.name }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted small">Unit Price:</span>
+                    <span class="fw-semibold small">₹{{ product.price|floatformat:2 }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Current Stock:</span>
+                    <span class="fw-semibold small">{{ product.stock_quantity }} units</span>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{% url 'inventory:product_list' %}" class="btn btn-light px-4 border">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger px-4 shadow-sm">
+                        <i class="bi bi-trash3-fill me-1"></i> Yes, Delete Permanently
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
