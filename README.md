@@ -10,7 +10,7 @@ An enterprise-grade, server-rendered Inventory and Product Management System dev
 
 ---
 
-## 🏛️ System Architecture (3–4 Lines)
+## 🏛️ System Architecture
 > The system implements a unified **Model-View-Template (MVT) & REST API architecture**, cleanly separating database entity modeling from business logic and presentation. Data access is centralized around optimized Django ORM querysets with atomic transactions and `PROTECT` foreign key safety to prevent accidental cascade deletions. The presentation layer features server-rendered templates styled with modern Bootstrap 5 alongside a decoupled JSON API layer built on Django REST Framework viewsets for headless integration. Real-time aggregation calculates category valuations and critical stock thresholds dynamically using database-level `F()` expressions.
 
 ---
